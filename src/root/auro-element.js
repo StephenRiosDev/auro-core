@@ -1,5 +1,5 @@
 import { AuroCore } from "./auro-core";
-import { LayoutFeature } from "./layout-feature";
+import { LayoutFeature } from "../features/layout-feature";
 
 export class AuroElement extends AuroCore {
 

@@ -1,6 +1,6 @@
 import { html } from "lit";
-import { AuroElement } from "./auro-element";
-import { FocusFeature } from "./focus-feature";
+import { AuroElement } from "../root/auro-element";
+import { FocusFeature } from "../features/focus-feature";
 
 export class CustomElement extends AuroElement {
 

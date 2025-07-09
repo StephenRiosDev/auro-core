@@ -1,4 +1,4 @@
-import { AuroFeature } from "./auro-feature";
+import { AuroFeature } from "../root/auro-feature";
 
 export class FocusFeature extends AuroFeature {
 
