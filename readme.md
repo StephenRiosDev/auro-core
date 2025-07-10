@@ -1,26 +1,16 @@
-# Auro Core
+# Auro Core / Features
 ## Description
-Auro core provides functionality that is fundamental to the inner workings of components in the Auro components library.
-
-## Breakdown
-
-### AuroCore
-
-This class provides the core `features` functionality, connecting features with a component so that coding in a feature is 1:1 with coding in an actual component, including property definitions, lifecycle hooks, etc.
-
-### AuroElement
-
-This is the base class for all Auro components and provides all default functionality/features.
-
-### AuroFeature
-
-This is the base class for all Auro Features and contains all the necessary functionality from the feature side to attach features to components
+Auro core is a POC for providing the features functionality in Lit as a part of the Auro design system and integrates existing concepts in the Auro design system into an interesting new idea for easier implementation, maintenance, and extension of complex functionality into our components.
 
 ## What Is A Feature?
 
 ### Description
 
-A feature is a single-responsibility file that attaches to and extends a LitElement class, or any class that at some level extends LitElement.
+A feature is a single-responsibility file that attaches to and extends a LitElement class, or any class that at some level extends LitElement, and functionally extends that class with new functionality without the need for an actual extension.
+
+While Lit does provide something similar with Mixins, they get rather complicated when you try to create a lot of them, and especially when you try to stack them. Features are far more coder-friendly, provide a simple interface, and are easy to create since they work the same way as a component or mixin (with a few caveats, but more on that later).
+
+Features also don't use or require the use of the `extends` key word at any point, and do not need to be chained or be passed a super constructor like mixins.
 
 ### What Problem Does This Solve?
 
@@ -58,7 +48,8 @@ export class MyComponent extends AuroElement {
       customFeature: {
         class: CustomFeature,
         config: { // optionally pass a default config object for your feature
-          customSetting: 'customValue'
+          customSetting: 'customValue',
+          defaultOn: false // Whether or not the feature should be enabled
         }
       }
     }
@@ -173,6 +164,50 @@ export class ComponentFeature extends AuroFeature {
 }
 ```
 
+## So What Can I Do With It?
+
+Oh not much, just pile in a bunch of optional features that can easily be enabled by any component up the chain but only need to be configured at the root:
+
+```javascript
+import { AuroCore } from "../root/auro-element.js";
+import { LayoutFeature } from '../features/layout-feature/js';
+import { FocusTracker } from '../features/focus-tracker.js';
+import { MouseTracker } from '../features/mouse-tracker.js';
+import { FocusTrap } from '../features/focus-trap.js';
+
+export class AuroElement extends AuroCore {
+
+  static get provides {
+    return {
+
+      // We always want to enable these, components up the chain can disable if they want
+      layout: { class: LayoutFeature },
+
+      // Provide a bunch of core functionality that components can opt into but disable them by default
+      focusTracker: { class: FocusTracker, enabled: false },
+      mouseTracker: { class: MouseTracker, enabled: false },
+      focusTrap: { class: FocusTrap, enabled: false },
+    }
+  }
+
+  // ... etc.
+}
+
+export class MyComponent extends AuroElement {
+  
+  static get features {
+    return {
+
+      // Child components can opt in via features
+      focusTracker: { enabled: true }
+
+      // We can even configure provided features on the fly
+      focusTrap: { enabled: true, config: { element: this.elRef, enabled: this.dropdownOpen } }
+    }
+  }
+}
+```
+
 ## So What's In This Repo?
 
 This repo contains the minimum working example (POC) of this concept, as well as an implementation of the only existing feature currently in our base AuroElement: Layout, and a simple one-off basic example (FocusTracker) that is poorly written but shows the simplest interpretation of a feature, as well as providing features at different levels.
@@ -182,3 +217,17 @@ This repo contains the minimum working example (POC) of this concept, as well as
 You should see a render `custom-element` DOM element, with all of the layout functionality working, and a button to dynamically change the layout so you can see the layout feature working.
 
 You will also notice that the "FocusFeature" class is setting a `tabindex` attribute, listening for focus, adds the `hasFocus` property, and toggles it based on the focus state of the element.
+
+## Class Breakdown
+
+### AuroCore
+
+This class provides the core `features` functionality, connecting features with a component so that coding in a feature is 1:1 with coding in an actual component, including property definitions, lifecycle hooks, etc.
+
+### AuroElement
+
+This is the base class for all Auro components and provides all default functionality/features.
+
+### AuroFeature
+
+This is the base class for all Auro Features and contains all the necessary functionality from the feature side to attach features to components

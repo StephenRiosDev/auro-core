@@ -50,7 +50,7 @@ export class AuroCore extends LitElement {
    *       'custom-feature': { 
    *         class: CustomFeature, 
    *         config: { ...defaultConfigOptions },
-   *         defaultOn: false 
+   *         enabled: false 
    *       }
    *     };
    *   }
@@ -149,11 +149,11 @@ export class AuroCore extends LitElement {
       // Skip if feature is explicitly disabled
       if (featureConfig === 'disable') return;
       
-      const { class: FeatureClass, config: defaultConfig = {}, defaultOn = true } = featureDef;
+      const { class: FeatureClass, config: defaultConfig = {}, enabled = true } = featureDef;
 
       // Skip non-default features that weren't requested
-      if (!defaultOn) return;
-      
+      if (!enabled) return;
+
       // Get final configuration
       const finalConfig = !featureConfig
         ? defaultConfig 
@@ -197,10 +197,10 @@ export class AuroCore extends LitElement {
         return;
       }
       
-      const { class: FeatureClass, config: defaultConfig = {}, defaultOn = true } = featureDef;
+      const { class: FeatureClass, config: defaultConfig = {}, enabled = true } = featureDef;
       
       // Determine if feature should be applied
-      if (!featureConfig && !defaultOn) {
+      if (!featureConfig && !enabled) {
         return; // Skip non-default features that weren't requested
       }
       
