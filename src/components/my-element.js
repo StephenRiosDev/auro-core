@@ -6,7 +6,7 @@ import { classMap } from "lit/directives/class-map.js";
 export class CustomElement extends AuroElement {
 
   updateLayout() {
-    this.layout = this.layout === "default" ? "expanded" : "default";
+    this.layout = this.layout === "classic" ? "emphasized" : "classic";
   }
 
   // TODO: Implement the feature config overrides
