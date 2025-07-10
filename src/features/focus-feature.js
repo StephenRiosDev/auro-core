@@ -14,14 +14,33 @@ export class FocusFeature extends AuroFeature {
   }
 
   _init() {
-    this.hasFocus = false;
-    this.host.setAttribute('tabindex', '0'); // Make the host focusable
+
+    this._setDefaults();
+    this._addEventListeners();
+  }
+
+  get _onFocusCallback() {
+    return typeof this.config.onFocus === 'function' ? this.config.onFocus : () => {};
+  }
+
+  get _onBlurCallback() {
+    return typeof this.config.onBlur === 'function' ? this.config.onBlur : () => {};
+  }
+
+  _addEventListeners() {
+    
     this.host.addEventListener('focus', () => {
       this.hasFocus = true;
+      this._onFocusCallback();
     });
 
     this.host.addEventListener('blur', () => {
       this.hasFocus = false;
+      this._onBlurCallback();
     });
+  }
+
+  _setDefaults() {
+    this.hasFocus = false; // Default focus state
   }
 }

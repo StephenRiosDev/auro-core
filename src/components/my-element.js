@@ -5,34 +5,76 @@ import { classMap } from "lit/directives/class-map.js";
 
 export class CustomElement extends AuroElement {
 
+  static get provides() {
+    return {
+      'focusTracker': {
+        class: FocusFeature,
+        config: {
+          onFocus: () => console.log('Element focused!'),
+          onBlur: () => console.log('Element blurred!')
+        }
+      }
+    };
+  }
+
   updateLayout() {
     this.layout = this.layout === "classic" ? "emphasized" : "classic";
   }
 
-  static get provides() {
-    return {
-      'focusTracker': {
-        class: FocusFeature
-      }
-    }
+  updateSize() {
+    this.size = this.size === "md" ? "lg" : "md";
   }
 
-  render() {
+  updateShape() {
+    this.shape = this.shape === "pill" ? "rounded" : "pill";
+  }
+
+  updateOnDark() {
+    this.onDark = !this.onDark;
+  }
+
+  renderLayoutClassic() {
     return html`
       <div class="${classMap(this.layoutClasses)}">
-        <h1>Custom Element</h1>
-        <h2>Features POC</h2>
-        <p>This is a custom element that extends AuroElement.</p>
-        <p> Check this element for cool layout classes being applied! </p>
-        <p> Focus is also tracked! </p>
-        <p>The Layout type is currently: ${this.layout}</p>
-        <p>Shape: ${this.shape}, Size: ${this.size}, On Dark: ${this.onDark}</p>
-        <p>Focus state: ${this.hasFocus ? 'Focused' : 'Not Focused'}</p>
-        <p>Layout Classes: ${JSON.stringify(this.layoutClasses)}</p>
-        <slot></slot>
-        <button @click="${this.updateLayout}">Update Layout</button>
+        <p>Classic Layout</p>
       </div>
     `;
+  }
+
+  renderLayoutEmphasized() {
+    return html`
+      <div class="${classMap(this.layoutClasses)}">
+        <p>Emphasized Layout</p>
+      </div>
+    `;
+  }
+
+  renderLayoutSnowflake() {
+    return html`
+      <div class="${classMap(this.layoutClasses)}">
+        <p>Snowflake Layout</p>
+      </div>
+    `;
+  }
+
+  renderers = {
+    "classic": this.renderLayoutClassic,
+    "emphasized": this.renderLayoutEmphasized,
+    "snowflake": this.renderLayoutSnowflake,
+    "default": this.renderLayoutClassic
+  }
+
+  renderLayout() {
+    const layoutRenderer = this.renderers[this.layout] || this.renderers["default"];
+    return html`
+      <button @click="${this.updateLayout}">Toggle Layout</button>
+      <button @click="${this.updateSize}">Toggle Size</button>
+      <button @click="${this.updateShape}">Toggle Shape</button>
+      <button @click="${this.updateOnDark}">Toggle On Dark</button>
+      ${layoutRenderer.call(this)}
+      <p>Shape: ${this.shape}, Size: ${this.size}, On Dark: ${this.onDark}</p>
+      <p>Focus state: ${this.hasFocus ? 'Focused' : 'Not Focused'}</p>
+    `
   }
 }
 
