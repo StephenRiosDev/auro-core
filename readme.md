@@ -147,8 +147,8 @@ export class ComponentFeature extends AuroFeature {
   // Lifecycle hooks work like normal
   updated(changedProperties) {
     super.updated(changedProperties) // very important with this framework, always call super
-    if (changedProperties.has("layout")) {
-      console.log("layout changed!");
+    if (changedProperties.has("shape")) {
+      console.log("shape changed!");
     }
   }
 
@@ -160,10 +160,6 @@ export class ComponentFeature extends AuroFeature {
     this._addEventListeners();
   }
 
-  _setDefaults() {
-    this.shape = "rounded";
-  }
-
   _addEventListeners() {
 
     // If you need to add things to the host DOM element, just use this.host
@@ -171,23 +167,8 @@ export class ComponentFeature extends AuroFeature {
     this.host.addEventListener('keydown', () => console.log("keydown"))
   }
 
-  _init() {
-    // Set defaults
-    this._setDefaults();
-
-    // Add event listeners
-    this._addEventListeners();
-  }
-
   _setDefaults() {
     this.shape = "rounded";
-  }
-
-  _addEventListeners() {
-
-    // If you need to add things to the host DOM element, just use this.host
-    // You can also do all the normal things like this.host.shadowRoot etc.
-    this.host.addEventListener('keydown', () => console.log("keydown"))
   }
 }
 ```
