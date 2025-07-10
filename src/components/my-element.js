@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { AuroElement } from "../root/auro-element";
 import { FocusFeature } from "../features/focus-feature";
+import { classMap } from "lit/directives/class-map.js";
 
 export class CustomElement extends AuroElement {
 
@@ -32,7 +33,7 @@ export class CustomElement extends AuroElement {
 
   render() {
     return html`
-      <div>
+      <div class="${classMap(this.layoutClasses)}">
         <h1>Custom Element</h1>
         <p>This is a custom element that extends AuroElement.</p>
         ${this.layout}

@@ -24,7 +24,6 @@ export class AuroFeature {
    }
 
    _createPropertyObserver(propertyName) {
-    console.log(`Creating observer for property: ${propertyName}`);
     const feature = this;
     Object.defineProperty(this, propertyName, {
       get() {
@@ -32,7 +31,6 @@ export class AuroFeature {
       },
       set(newValue) {
         feature.host[propertyName] = newValue;
-        console.log(feature.host[propertyName]);
         feature.setInternalValue(propertyName, newValue);
       }
     });

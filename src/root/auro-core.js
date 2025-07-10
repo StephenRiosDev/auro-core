@@ -280,7 +280,6 @@ export class AuroCore extends LitElement {
   }
 
   firstUpdated(changedProperties) {
-    console.log("AuroCore firstUpdated");
     this.processFeatureLifecycle('beforeFirstUpdated', changedProperties);
     super.firstUpdated(changedProperties);
     this.processFeatureLifecycle('firstUpdated', changedProperties);
@@ -288,7 +287,6 @@ export class AuroCore extends LitElement {
   }
 
   updated(changedProperties) {
-    console.log("AuroCore updated");
     this.processFeatureLifecycle('beforeUpdated', changedProperties);
     super.updated(changedProperties);
     this.processFeatureLifecycle('updated', changedProperties);

@@ -4,34 +4,101 @@ export class LayoutFeature extends AuroFeature {
 
   constructor(host, config) {
     super(host, config);
-    this.layout = config.layout || "default";
-    this.shape = config.shape || "default";
-    this.size = config.size || "default";
+    this.layout = config.layout || "classic";
+    this.shape = config.shape || "pill";
+    this.size = config.size || "md";
     this.onDark = config.onDark || false;
+    this.layoutClasses = {};
 
-    // setInterval(() => {
-    //   this.layout = this.layout === "bob" ? "tom" : "bob";
-    // }, 2500);
+    // Initialize layout classes
+    this.updateComponentArchitecture();
   }
 
   static get properties() {
     return {
-      layout: { type: String, attribute: "layout", reflect: true },
-      shape: { type: String, attribute: "shape", reflect: true },
-      size: { type: String, attribute: "size", reflect: true },
-      onDark: { type: Boolean, attribute: "ondark", reflect: true }
+      layout: {
+        type: String,
+        attribute: "layout",
+        reflect: true
+      },
+
+      shape: {
+        type: String,
+        attribute: "shape",
+        reflect: true
+      },
+
+      size: {
+        type: String,
+        attribute: "size",
+        reflect: true
+      },
+
+      onDark: {
+        type: Boolean,
+        attribute: "ondark",
+        reflect: true
+      },
+
+      layoutClasses: {
+        type: Object,
+        attribute: false,
+        reflect: false
+      },
     };
   }
 
-  firstUpdated() {
-    super.firstUpdated();
-    console.log("LayoutFeature firstUpdated");
-    console.log(this.layout);
+  updateShapeClasses() {
+    // Create a new object with the existing classes
+    const updatedClasses = {...this.layoutClasses};
+    
+    // Remove existing shape classes
+    Object.keys(updatedClasses).forEach(className => {
+      if (className.startsWith('shape-')) {
+        delete updatedClasses[className];
+      }
+    });
+
+    // Add new shape class
+    if (this.shape && this.size) {
+      updatedClasses[`shape-${this.shape.toLowerCase()}-${this.size.toLowerCase()}`] = true;
+    } else {
+      updatedClasses['shape-none'] = true;
+    }
+
+    // Update layoutClasses once
+    this.layoutClasses = updatedClasses;
+  }
+
+  updateLayoutClasses() {
+    if (this.layout) {
+      // Create a new object with the existing classes
+      const updatedClasses = {...this.layoutClasses};
+      
+      // Remove existing layout classes
+      Object.keys(updatedClasses).forEach(className => {
+        if (className.startsWith('layout-')) {
+          delete updatedClasses[className];
+        }
+      });
+
+      // Add new layout class
+      updatedClasses[`layout-${this.layout.toLowerCase()}`] = true;
+      
+      // Update layoutClasses once
+      this.layoutClasses = updatedClasses;
+    }
+  }
+
+  updateComponentArchitecture() {
+    this.updateLayoutClasses();
+    this.updateShapeClasses();
   }
 
   updated(changedProperties) {
     super.updated(changedProperties);
-    console.log("LayoutFeature updated");
-    console.log(this.layout);
+    if (changedProperties.has('layout') || changedProperties.has('shape') || changedProperties.has('size')) {
+      this.updateComponentArchitecture();
+    }
   }
 }
