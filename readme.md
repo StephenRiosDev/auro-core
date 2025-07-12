@@ -1,4 +1,10 @@
 # Auro Core / Features
+
+## Dependency Considerations
+
+Uses the following dependencies that are not currently used in the Auro project anywhere:
+- lodash.merge
+
 ## Description
 Auro core is a POC for providing the features functionality in Lit as a part of the Auro design system and integrates existing concepts in the Auro design system into an interesting new idea for easier implementation, maintenance, and extension of complex functionality into our components.
 

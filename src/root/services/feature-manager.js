@@ -1,3 +1,5 @@
+import merge from 'lodash.merge';
+
 /**
  * Compositional service responsible for managing features and their lifecycle hooks
  * and connecting them to the host component.
@@ -46,16 +48,16 @@ export class FeatureManager {
    * Collects feature configurations (`static get features`) from the inheritance chain
    * @returns {Object} Merged feature configurations
    */
-  static getInheritedConfigs(constructor) {
+   static getInheritedConfigs(constructor) {
     // Start with empty config object
     const configs = {};
-    
+
     // Walk up the prototype chain to collect feature configs
     let current = constructor;
     while (current && current.name !== 'LitElement') {
       // Get feature configurations from this class
       const features = current.features || {};
-      
+
       // Merge with accumulated configs
       Object.entries(features).forEach(([name, config]) => {
         if (!configs[name]) {
@@ -63,19 +65,35 @@ export class FeatureManager {
         } else if (config === 'disable') {
           // Mark feature as disabled
           configs[name] = 'disable';
-        } else if (configs[name] !== 'disable' && config.config) {
-          // Merge configs (child overrides parent)
+        } else if (configs[name] !== 'disable') {
+          // Deep merge configs (child overrides parent)
+          const prevConfig = configs[name].config || {};
+          const nextConfig = config.config || {};
+          const prevProps = configs[name].properties || {};
+          const nextProps = config.properties || {};
+
+          // Merge properties, with 'disable' support
+          const mergedProps = { ...prevProps };
+          Object.entries(nextProps).forEach(([propName, propValue]) => {
+            if (propValue === 'disable') {
+              delete mergedProps[propName];
+            } else {
+              mergedProps[propName] = propValue;
+            }
+          });
+
           configs[name] = {
             ...configs[name],
-            config: { ...(configs[name].config || {}), ...config.config }
+            config: merge({}, prevConfig, nextConfig),
+            properties: mergedProps
           };
         }
       });
-      
+
       // Move up the prototype chain
       current = Object.getPrototypeOf(current);
     }
-    
+
     return configs;
   }
 
@@ -101,26 +119,36 @@ export class FeatureManager {
     // Collect properties from all applicable features
     Object.entries(providedFeatures).forEach(([featureName, featureDef]) => {
       const featureConfig = featureConfigs[featureName];
-      
+
       // Skip if feature is explicitly disabled
       if (featureConfig === 'disable') return;
-      
+
       const { class: FeatureClass, config: defaultConfig = {}, enabled = true } = featureDef;
 
       // Skip non-default features that weren't requested
       if (!enabled) return;
 
-      // Get final configuration
+      // Get final configuration using lodash.merge
       const finalConfig = !featureConfig
-        ? defaultConfig 
-        : { ...defaultConfig, ...(featureConfig.config || {}) };
-      
-      // If feature has static properties, collect them
-      if (FeatureClass.properties) {
-        Object.entries(FeatureClass.properties).forEach(([propName, propConfig]) => {
-          constructor._featureProperties[propName] = propConfig;
+        ? defaultConfig
+        : merge({}, defaultConfig, featureConfig.config || {});
+
+      // Merge properties: static + config properties, with 'disable' support
+      let mergedProperties = { ...(FeatureClass.properties || {}) };
+      if (featureConfig && featureConfig.properties) {
+        Object.entries(featureConfig.properties).forEach(([propName, propValue]) => {
+          if (propValue === 'disable') {
+            delete mergedProperties[propName];
+          } else {
+            mergedProperties[propName] = propValue;
+          }
         });
-      };
+      }
+
+      // Add merged properties to the registry
+      Object.entries(mergedProperties).forEach(([propName, propConfig]) => {
+        constructor._featureProperties[propName] = propConfig;
+      });
     });
 
     constructor._featuresInitialized = true;
@@ -148,17 +176,17 @@ export class FeatureManager {
       // Determine if feature should be applied
       if (!featureConfig && !enabled) return;
       
-      // Determine final configuration
+      // Determine final configuration using lodash.merge
       const finalConfig = !featureConfig
-        ? defaultConfig 
-        : { ...defaultConfig, ...(featureConfig.config || {}) };
+        ? defaultConfig
+        : merge({}, defaultConfig, featureConfig.config || {});
       
       // Create the feature
       const featureInstance = new FeatureClass(this.host, finalConfig);
       
       // Store reference to feature instance
       this._featureInstances.set(featureName, featureInstance);
-      
+
       // Register instance properties if provided
       if (featureInstance.properties) {
         Object.entries(featureInstance.properties).forEach(([propName, propConfig]) => {
@@ -167,11 +195,6 @@ export class FeatureManager {
             this.host[propName] = propConfig.value;
           }
         });
-      }
-      
-      // Apply the feature's properties and methods
-      if (typeof featureInstance.applyToComponent === 'function') {
-        featureInstance.applyToComponent(this.host);
       }
     });
   }
