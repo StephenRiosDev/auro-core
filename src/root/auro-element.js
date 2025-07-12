@@ -19,6 +19,7 @@ export class AuroElement extends AuroCore {
 
   /**
    * Render the layout for the component.
+   * Do not override this method in extending classes.
    * @returns {TemplateResult} The layout object for the component.
    */
   render() {

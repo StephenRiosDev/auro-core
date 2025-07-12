@@ -15,6 +15,7 @@ export class FocusFeature extends AuroFeature {
 
   _init() {
 
+    this._setHostFocusable();
     this._setDefaults();
     this._addEventListeners();
   }
@@ -25,6 +26,12 @@ export class FocusFeature extends AuroFeature {
 
   get _onBlurCallback() {
     return typeof this.config.onBlur === 'function' ? this.config.onBlur : () => {};
+  }
+
+  _setHostFocusable() {
+    if (this.config.makeHostFocusable) {
+      this.host.tabIndex = 0; // Make the host focusable
+    }
   }
 
   _addEventListeners() {

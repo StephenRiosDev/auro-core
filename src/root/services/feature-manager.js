@@ -1,8 +1,12 @@
 /**
- * Class responsible for managing features and their lifecycle
- * This allows components to use a compositional approach to features
+ * Compositional service responsible for managing features and their lifecycle hooks
+ * and connecting them to the host component.
  */
 export class FeatureManager {
+
+  // Stores all instances of provided features
+  _featureInstances;
+
   constructor(host, constructor) {
     this.host = host;
     this.constructor = constructor;
@@ -11,7 +15,7 @@ export class FeatureManager {
   }
 
   /**
-   * Collects features from the entire inheritance chain
+   * Collects features (`static get provides`) from the entire inheritance chain
    * @returns {Object} Merged feature definitions
    */
   static getInheritedProvides(constructor) {
@@ -39,7 +43,7 @@ export class FeatureManager {
   }
 
   /**
-   * Collects feature configurations from the inheritance chain
+   * Collects feature configurations (`static get features`) from the inheritance chain
    * @returns {Object} Merged feature configurations
    */
   static getInheritedConfigs(constructor) {
@@ -78,6 +82,7 @@ export class FeatureManager {
   /**
    * Initialize features and collect their properties
    * This needs to be called before the element is registered
+   * This is done in the static `register()` method of the core component
    */
   static prepareFeatures(constructor) {
     if (constructor._featuresInitialized) {
@@ -136,16 +141,12 @@ export class FeatureManager {
       const featureConfig = featureConfigs[featureName];
 
       // Skip if feature is explicitly disabled
-      if (featureConfig === 'disable') {
-        return;
-      }
+      if (featureConfig === 'disable') return;
       
       const { class: FeatureClass, config: defaultConfig = {}, enabled = true } = featureDef;
       
       // Determine if feature should be applied
-      if (!featureConfig && !enabled) {
-        return; // Skip non-default features that weren't requested
-      }
+      if (!featureConfig && !enabled) return;
       
       // Determine final configuration
       const finalConfig = !featureConfig
@@ -176,32 +177,15 @@ export class FeatureManager {
   }
 
   /**
-   * Process lifecycle method with before/after hooks
+   * Process lifecycle method for all registered features
+   * This allows features to hook into standard LitElement lifecycle methods
+   * This is called from the core component's lifecycle methods
    * @param {string} methodName - Name of lifecycle method
    * @param {Array} args - Arguments to pass to method
    */
   processLifecycle(methodName, ...args) {
-    // Call "before" hooks
-    const beforeMethodName = `before${methodName.charAt(0).toUpperCase()}${methodName.slice(1)}`;
     this._featureInstances.forEach(feature => {
-      if (typeof feature[beforeMethodName] === 'function') {
-        feature[beforeMethodName](...args);
-      }
-    });
-    
-    // Call actual method hooks
-    this._featureInstances.forEach(feature => {
-      if (typeof feature[methodName] === 'function') {
-        feature[methodName](...args);
-      }
-    });
-    
-    // Call "after" hooks
-    const afterMethodName = `after${methodName.charAt(0).toUpperCase()}${methodName.slice(1)}`;
-    this._featureInstances.forEach(feature => {
-      if (typeof feature[afterMethodName] === 'function') {
-        feature[afterMethodName](...args);
-      }
+      if (typeof feature[methodName] === 'function') feature[methodName](...args);
     });
   }
 }
