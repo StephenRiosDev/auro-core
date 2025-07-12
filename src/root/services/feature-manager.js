@@ -187,6 +187,13 @@ export class FeatureManager {
       // Store reference to feature instance
       this._featureInstances.set(featureName, featureInstance);
 
+      // Set the host reference on the feature instance
+      if (this.host[featureName]) {
+        console.warn(`Feature Warning: Property ${featureName} is already defined on the host. Attaching with '_' prefix. \nRecommended: Change feature name via provides key to avoid conflicts.`);
+      }
+      const featureKey = this.host[featureName] ? `_${featureName}` : featureName;
+      this.host[featureKey] = featureInstance;
+
       // Register instance properties if provided
       if (featureInstance.properties) {
         Object.entries(featureInstance.properties).forEach(([propName, propConfig]) => {
